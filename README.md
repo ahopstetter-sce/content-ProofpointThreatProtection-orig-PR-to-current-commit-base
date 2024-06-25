@@ -1,20 +1,24 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# ProofpointThreatProtection - XSOAR Integration
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+## Introduction 
+Repository to house the "pre-contribution" code work associated with the ProofpointThreatProtection intergration code that will be contributed to XSOAR for their Marketplace and continued support.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Noteworthy items
+1.	Originally coded/contributed by Randy Baldwin.
+2.	Code tests can be conducted using the XSOAR standard pytest / pytest-mock tools.
+3.  A built-in FastAPI server was coded into the testing process and runs *optionally* with the tests if the fastapi python module is accessible. This was put in place to facilitate testing of the client integration code while in a development environment where the assocaited API server resources were not accessible/usable for QA testing purposes. The FastAPI test server simply mimics all of the server responses the real API server would yield, allowing the client side to be fully tested without the need to have the server side present.
+4.  If the fastapi module is not present the test code performs the more traditional "mock" style testing as completely enough to pass the demisto-sdk 70% minimum code coverage requirements. ( But it is still just mocked :) )
+5.  If utilized, the FastAPI server binds itself to TCP port 8000 on the loopback address during testing. To alter these settings you can alter the 2 associated constants at the top of ProofpointThreatProtection_test.py.
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+## To obtain fastapi
+```
+python3 -m pip install fastapi
+```
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## Testing the code
+1.  Code is fully test-able via the built in standard demisto-sdk pre-commit process and occurs automatically within that process. Note this test is the fully mocked version as the fastapi python module is not present within xsoar docker containers.
+2.  To run tests locally / manually [includes fastapi server] from a linux/WSL bourne like shell ...
+```
+cd Packs/ProofpointThreatProtection/Integrations/ProofpointThreatProtection/
+pytest
+```
