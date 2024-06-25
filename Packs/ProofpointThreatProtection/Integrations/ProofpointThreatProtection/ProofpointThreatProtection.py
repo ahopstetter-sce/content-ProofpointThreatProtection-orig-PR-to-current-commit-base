@@ -64,8 +64,9 @@ class Client(BaseClient):
                     return res.get('access_token')
 
             except Exception as e:
-                return_error(f'Error occurred while creating an access token. Please check the instance configuration.'
-                             f'\n\n{e.args[0]}')
+                raise (Exception(f'Error occurred while creating an access token. '
+                                 f'Please check the instance configuration.'
+                                 f'\n\n{e.args[0]}'))
 
     def get_safelist(self, cluster_id):
         return self._http_request(
