@@ -1,16 +1,15 @@
 import demistomock as demisto  # noqa: F401
 from CommonServerPython import *  # noqa: F401
 
-import json
-from typing import Any
-import dateparser
-
 
 ''' CONSTANTS '''
 
 
-URL_SUFFIX_BLOCKLIST = '/emailProtection/modules/spam/orgBlockList'
+CTX_PREFIX = 'ProofpointThreatProtection'
+OSL_HEADER = 'Organizational Safe List'
+OBL_HEADER = 'Organizational Block List'
 URL_SUFFIX_SAFELIST = '/emailProtection/modules/spam/orgSafeList'
+URL_SUFFIX_BLOCKLIST = '/emailProtection/modules/spam/orgBlockList'
 AUTH_HOST_BASE_URL = 'https://auth.proofpoint.com/v1'
 
 
@@ -114,6 +113,12 @@ class Client(BaseClient):
 ''' HELPER FUNCTIONS '''
 
 
+def make_return_command_results(readable_op: str, op: dict) -> CommandResults:
+    return_cr = CommandResults(readable_output=readable_op, outputs_prefix=CTX_PREFIX, outputs=op)
+
+    return return_cr
+
+
 ''' COMMAND FUNCTIONS '''
 
 
@@ -124,72 +129,44 @@ def test_module(client: Client, cluster_id) -> str:
 
 def safelist_get_command(client: Client, cluster_id) -> CommandResults:
     res = client.get_safelist(cluster_id)
-
-    outputs = {
-        'Safelist': res.get('entries')
-    }
-
-    return CommandResults(
-        readable_output="Organizational Safe List",
-        outputs_prefix='ProofpointThreatProtection',
-        outputs_key_field='',
-        outputs=outputs
-    )
+    res_rc = make_return_command_results(OSL_HEADER, {'Safelist': res.get('entries')})
+    return res_rc
 
 
-def safelist_add_delete_command(client: Client, cluster_id, args) -> CommandResults:
-    res = client.safelist_add_delete(cluster_id, args)
-
-    outputs = {
-        'Safelist': res
-    }
-
-    return CommandResults(
-        readable_output="Organizational Safe List",
-        outputs_prefix='ProofpointThreatProtection',
-        outputs_key_field='',
-        outputs=outputs
-    )
+def safelist_add_delete_command(client: Client, cluster_id) -> CommandResults:
+    res = client.safelist_add_delete(cluster_id, client.get_args())
+    res_rc = make_return_command_results(OSL_HEADER, {'Safelist': res})
+    return res_rc
 
 
 def blocklist_get_command(client: Client, cluster_id) -> CommandResults:
     res = client.get_blocklist(cluster_id)
-
-    outputs = {
-        'Blocklist': res.get('entries')
-    }
-
-    return CommandResults(
-        readable_output="Organizational Block List",
-        outputs_prefix='ProofpointThreatProtection',
-        outputs_key_field='',
-        outputs=outputs
-    )
+    res_rc = make_return_command_results(OBL_HEADER, {'Blocklist': res.get('entries')})
+    return res_rc
 
 
-def blocklist_add_delete_command(client: Client, cluster_id, args) -> CommandResults:
-    res = client.blocklist_add_delete(cluster_id, args)
+def blocklist_add_delete_command(client: Client, cluster_id) -> CommandResults:
+    res = client.blocklist_add_delete(cluster_id, client.get_args())
+    res_rc = make_return_command_results(OBL_HEADER, {"Blocklist": res})
+    return res_rc
 
-    outputs = {
-        'Blocklist': res
-    }
 
-    return CommandResults(
-        readable_output="Organizational Block List",
-        outputs_prefix='ProofpointThreatProtection',
-        outputs_key_field='',
-        outputs=outputs
-    )
+'''         UPDATE COMMAND MAPPINGS
+    (After command function declarations) '''
+
+COMMANDS = {
+    'test-module': module_test_command,
+    'proofpoint-tp-safelist-get': safelist_get_command,
+    'proofpoint-tp-blocklist-get': blocklist_get_command,
+    'proofpoint-tp-safelist-add-or-delete-entry': safelist_add_delete_command,
+    'proofpoint-tp-blocklist-add-or-delete-entry': blocklist_add_delete_command
+}
 
 
 ''' MAIN FUNCTION '''
 
 
-def main() -> None:
-    params = demisto.params()
-    args = demisto.args()
-    command = demisto.command()
-
+def parse_params(params: dict):
     client_id = params.get('credentials', {}).get('username')
     client_secret = params.get('credentials', {}).get('password')
     base_url = params.get('url')
@@ -197,26 +174,24 @@ def main() -> None:
     verify_certificate = not params.get('insecure', False)
     proxy = params.get('proxy', False)
 
-    demisto.debug(f'Command being called is {command}')
-    commands = {
-        'test-module': test_module,
-        'proofpoint-tp-safelist-get': safelist_get_command,
-        'proofpoint-tp-blocklist-get': blocklist_get_command
-    }
-    commands_with_args = {
-        'proofpoint-tp-safelist-add-or-delete-entry': safelist_add_delete_command,
-        'proofpoint-tp-blocklist-add-or-delete-entry': blocklist_add_delete_command
-    }
+    return client_id, client_secret, base_url, cluster_id, verify_certificate, proxy
+
+
+def main() -> None:
+
+    client_id, client_secret, base_url, cluster_id, verify_certificate, proxy = parse_params(demisto.params())
+
+    command = demisto.command()
+
     try:
-        client = Client(
-            base_url=base_url,
-            verify=verify_certificate,
-            proxy=proxy)
-        client.get_access_token(client_id, client_secret)
-        if command in commands:
-            return_results(commands[command](client, cluster_id))
-        elif command in commands_with_args:
-            return_results(commands_with_args[command](client, cluster_id, args))
+        if command in COMMANDS:
+            client = Client(
+                base_url=base_url,
+                verify=verify_certificate,
+                proxy=proxy)
+
+            client.get_access_token(client_id, client_secret)
+            return_results(COMMANDS[command](client, cluster_id))
         else:
             raise NotImplementedError(f'Command {command} is not implemented')
 
