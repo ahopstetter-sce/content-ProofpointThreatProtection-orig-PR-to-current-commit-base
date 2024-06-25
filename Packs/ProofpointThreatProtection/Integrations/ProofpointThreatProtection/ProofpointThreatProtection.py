@@ -11,10 +11,26 @@ import dateparser
 
 URL_SUFFIX_BLOCKLIST = '/emailProtection/modules/spam/orgBlockList'
 URL_SUFFIX_SAFELIST = '/emailProtection/modules/spam/orgSafeList'
+AUTH_HOST_BASE_URL = 'https://auth.proofpoint.com/v1'
+
+
+''' INTEGRATION API CLIENT '''
 
 
 class Client(BaseClient):
     """Client class to interact with the service API"""
+
+    def get_args(self):
+        return demisto.args()
+
+    def get_auth_host(self):
+        return AUTH_HOST_BASE_URL
+
+    def get_shared_integration_context(self):
+        return get_integration_context()
+
+    def set_shared_integration_context(self, context):
+        return set_integration_context(context)
 
     def get_access_token(self, client_id, client_secret):
         """
@@ -22,14 +38,14 @@ class Client(BaseClient):
         the API key and secret.
         """
         # Check if there is an existing valid access token
-        integration_context = get_integration_context()
+        integration_context = self.get_shared_integration_context()
         if integration_context.get('access_token') and integration_context.get('expiry_time') > date_to_timestamp(datetime.now()):
             return integration_context.get('access_token')
         else:
             try:
                 res = self._http_request(
                     method='POST',
-                    full_url='https://auth.proofpoint.com/v1/token',
+                    full_url=f'{self.get_auth_host()}/token',
                     headers={'Content-Type': 'application/x-www-form-urlencoded'},
                     data={
                         'grant_type': 'client_credentials',
@@ -44,9 +60,10 @@ class Client(BaseClient):
                         'access_token': res.get('access_token'),
                         'expiry_time': expiry_time
                     }
-                    set_integration_context(context)
+                    self.set_shared_integration_context(context)
                     self._headers['Authorization'] = f'Bearer {res.get("access_token")}'
                     return res.get('access_token')
+
             except Exception as e:
                 return_error(f'Error occurred while creating an access token. Please check the instance configuration.'
                              f'\n\n{e.args[0]}')
