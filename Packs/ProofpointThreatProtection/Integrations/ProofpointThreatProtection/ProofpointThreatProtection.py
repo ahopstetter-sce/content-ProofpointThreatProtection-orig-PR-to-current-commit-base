@@ -127,7 +127,7 @@ def make_return_command_results(readable_op: str, op: dict) -> CommandResults:
 ''' COMMAND FUNCTIONS '''
 
 
-def test_module(client: Client, cluster_id) -> str:
+def module_test_command(client: Client, cluster_id) -> str:
     client.get_blocklist(cluster_id)
     return 'ok'
 
