@@ -76,17 +76,19 @@ class Client(BaseClient):
         )
 
     def safelist_add_delete(self, cluster_id, args):
+        import json
         return self._http_request(
             'POST',
             url_suffix=URL_SUFFIX_SAFELIST,
+            headers={'Content-Type': 'application/json'},
             params={'clusterId': cluster_id},
-            data={
+            data=json.dumps({
                 'action': args.get('action'),
                 'attribute': args.get('attribute'),
                 'operator': args.get('operator'),
                 'value': args.get('value'),
                 'comment': args.get('comment')
-            }
+            })
         )
 
     def get_blocklist(self, cluster_id):
@@ -97,17 +99,19 @@ class Client(BaseClient):
         )
 
     def blocklist_add_delete(self, cluster_id, args):
+        import json
         return self._http_request(
             'POST',
             url_suffix=URL_SUFFIX_BLOCKLIST,
+            headers={'Content-Type': 'application/json'},
             params={'clusterId': cluster_id},
-            data={
+            data=json.dumps({
                 'action': args.get('action'),
                 'attribute': args.get('attribute'),
                 'operator': args.get('operator'),
                 'value': args.get('value'),
                 'comment': args.get('comment')
-            }
+            })
         )
 
 
