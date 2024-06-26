@@ -3,7 +3,7 @@ commonfields:
   id: Proofpoint Threat Protection
   version: -1
 configuration:
-- defaultvalue: https://https://auth.proofpoint.com/v1
+- defaultvalue: https://threatprotection-api.proofpoint.com/api/v1
   display: URL
   name: url
   required: true
