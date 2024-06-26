@@ -24,7 +24,7 @@ After you successfully execute a command, a DBot message appears in the War Room
 ### proofpoint-tp-blocklist-get
 
 ***
-Get all entries in the Organizational Block List
+Get all entries in the Organizational Block List.
 
 #### Base Command
 
@@ -43,7 +43,7 @@ There are no input arguments for this command.
 ### proofpoint-tp-blocklist-add-or-delete-entry
 
 ***
-Add/Delete entry from the Organizational Block List
+Add/Delete entry from the Organizational Block List.
 
 #### Base Command
 
@@ -68,7 +68,7 @@ Add/Delete entry from the Organizational Block List
 ### proofpoint-tp-safelist-get
 
 ***
-Get all entries in the Organizational Safe List
+Get all entries in the Organizational Safe List.
 
 #### Base Command
 
@@ -87,7 +87,7 @@ There are no input arguments for this command.
 ### proofpoint-tp-safelist-add-or-delete-entry
 
 ***
-Add To/Delete From the Organizational Safe List
+Add To/Delete From the Organizational Safe List.
 
 #### Base Command
 
