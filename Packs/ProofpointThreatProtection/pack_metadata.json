@@ -17,6 +17,7 @@
         "PoD"
     ],
     "marketplaces": [
+        "xsoar",
         "marketplacev2"
     ],
     "githubUser": [
