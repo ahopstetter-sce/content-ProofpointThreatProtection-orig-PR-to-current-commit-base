@@ -124,7 +124,8 @@ script:
     outputs:
     - contextPath: ProofpointThreatProtection.Safelist
       description: Standard HTTP response with status code 200.
-  dockerimage: demisto/python3:3.10.14.91134
+  dockerimage: demisto/python3:3.10.14.100715
+  alt_dockerimages: [ "demisto/fastapi:0.111.0.100929" ]
   runonce: false
   script: ''
   subtype: python3
